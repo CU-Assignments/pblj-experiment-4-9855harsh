@@ -1,0 +1,137 @@
+import java.util.*;
+
+class Card {
+    String value;
+    String suit;
+
+    public Card(String value, String suit) {
+        this.value = value;
+        this.suit = suit;
+    }
+
+    @Override
+    public String toString() {
+        return value + " of " + suit;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Card card = (Card) obj;
+        return Objects.equals(value, card.value) && Objects.equals(suit, card.suit);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, suit);
+    }
+}
+
+public class CardCollectionSystem {
+    private Set<Card> cards;
+    private Scanner scanner;
+
+    public CardCollectionSystem() {
+        cards = new HashSet<>();
+        scanner = new Scanner(System.in);
+    }
+
+    public void addCard() {
+        System.out.print("Enter Card (e.g., Ace of Spades): ");
+        String cardInput = scanner.nextLine();
+        String[] parts = cardInput.split(" of ");
+        if (parts.length != 2) {
+            System.out.println("Invalid card format. Please use 'Value of Suit'.");
+            return;
+        }
+        Card card = new Card(parts[0], parts[1]);
+        if (cards.contains(card)) {
+            System.out.println("Error: Card \"" + card + "\" already exists.");
+            return;
+        }
+        cards.add(card);
+        System.out.println("Card added: " + card);
+    }
+
+    public void findCardsBySuit() {
+        System.out.print("Enter Suit to find cards (e.g., Hearts): ");
+        String suit = scanner.nextLine();
+        boolean found = false;
+        for (Card card : cards) {
+            if (card.suit.equalsIgnoreCase(suit)) {
+                System.out.println(card);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("No cards found for " + suit + ".");
+        }
+    }
+
+    public void displayAllCards() {
+        if (cards.isEmpty()) {
+            System.out.println("No cards found.");
+            return;
+        }
+        for (Card card : cards) {
+            System.out.println(card);
+        }
+    }
+
+    public void removeCard() {
+        System.out.print("Enter Card to remove (e.g., 10 of Diamonds): ");
+        String cardInput = scanner.nextLine();
+        String[] parts = cardInput.split(" of ");
+        if (parts.length != 2) {
+            System.out.println("Invalid card format. Please use 'Value of Suit'.");
+            return;
+        }
+        Card cardToRemove = new Card(parts[0], parts[1]);
+        if (cards.remove(cardToRemove)) {
+            System.out.println("Card removed: " + cardToRemove);
+        } else {
+            System.out.println("Card not found.");
+        }
+    }
+
+    public static void main(String[] args) {
+        CardCollectionSystem system = new CardCollectionSystem();
+        Scanner scanner = new Scanner(System.in);
+        int choice;
+
+        do {
+            System.out.println("\nCard Collection System");
+            System.out.println("1. Add Card");
+            System.out.println("2. Find Cards by Suit");
+            System.out.println("3. Display All Cards");
+            System.out.println("4. Remove Card");
+            System.out.println("0. Exit");
+            System.out.print("Enter your choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine(); 
+
+            switch (choice) {
+                case 1:
+                    system.addCard();
+                    break;
+                case 2:
+                    system.findCardsBySuit();
+                    break;
+                case 3:
+                    system.displayAllCards();
+                    break;
+                case 4:
+                    system.removeCard();
+                    break;
+                case 0:
+                    System.out.println("Exiting...");
+                    break;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        } while (choice != 0);
+
+        scanner.close();
+    }
+}
