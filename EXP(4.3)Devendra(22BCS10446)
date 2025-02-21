@@ -1,0 +1,114 @@
+import java.util.Arrays;
+
+class TicketBookingSystem {
+    private boolean[] seats;
+
+    public TicketBookingSystem(int numberOfSeats) {
+        seats = new boolean[numberOfSeats];
+        Arrays.fill(seats, false); 
+    }
+
+    public synchronized boolean bookSeat(int seatNumber, String userName) {
+        if (seatNumber < 1 || seatNumber > seats.length) {
+            System.out.println(userName + ": Invalid seat number!");
+            return false;
+        }
+
+        if (seats[seatNumber - 1]) {
+            System.out.println(userName + ": Seat " + seatNumber + " is already booked!");
+            return false;
+        }
+
+        seats[seatNumber - 1] = true;
+        System.out.println(userName + " booked seat " + seatNumber);
+        return true;
+    }
+
+    public void displayBookingStatus() {
+        System.out.println("\nBooking Status:");
+        boolean anySeatBooked = false;
+        for (int i = 0; i < seats.length; i++) {
+            if (seats[i]) {
+                System.out.println("Seat " + (i + 1) + ": Booked");
+                anySeatBooked = true;
+            } else {
+                System.out.println("Seat " + (i + 1) + ": Available");
+            }
+        }
+        if(!anySeatBooked){
+            System.out.println("No bookings yet.");
+        }
+    }
+}
+
+class BookingThread extends Thread {
+    private TicketBookingSystem system;
+    private int seatNumber;
+    private String userName;
+
+    public BookingThread(TicketBookingSystem system, int seatNumber, String userName) {
+        this.system = system;
+        this.seatNumber = seatNumber;
+        this.userName = userName;
+    }
+
+    @Override
+    public void run() {
+        system.bookSeat(seatNumber, userName);
+    }
+}
+
+public class TicketBooking {
+    public static void main(String[] args) throws InterruptedException {
+        int numberOfSeats = 5;
+        TicketBookingSystem system = new TicketBookingSystem(numberOfSeats);
+
+        // Test Case 2: Successful Booking
+        BookingThread anish = new BookingThread(system, 1, "Anish (VIP)");
+        anish.setPriority(Thread.MAX_PRIORITY);
+        BookingThread bobby = new BookingThread(system, 2, "Bobby (Regular)");
+        BookingThread charlie = new BookingThread(system, 3, "Charlie (VIP)");
+        charlie.setPriority(Thread.MAX_PRIORITY);
+
+        anish.start();
+        bobby.start();
+        charlie.start();
+
+        anish.join();
+        bobby.join();
+        charlie.join();
+
+        
+        BookingThread bobby2 = new BookingThread(system, 4, "Bobby (Regular)");
+        BookingThread anish2 = new BookingThread(system, 4, "Anish (VIP)");
+        anish2.setPriority(Thread.MAX_PRIORITY);
+
+        bobby2.start();
+        anish2.start();
+
+        bobby2.join();
+        anish2.join();
+
+        
+        BookingThread anish3 = new BookingThread(system, 1, "Anish (VIP)");
+        anish3.setPriority(Thread.MAX_PRIORITY);
+        BookingThread bobby3 = new BookingThread(system, 1, "Bobby (Regular)");
+
+        anish3.start();
+        anish3.join();
+        bobby3.start();
+        bobby3.join();
+
+        
+        BookingThread[] threads = new BookingThread[10];
+        for(int i = 0; i < 10; i++){
+            threads[i] = new BookingThread(system, (i%5)+1, "User " + (i+1));
+            threads[i].start();
+        }
+        for(int i = 0; i < 10; i++){
+            threads[i].join();
+        }
+
+        system.displayBookingStatus();
+    }
+}
